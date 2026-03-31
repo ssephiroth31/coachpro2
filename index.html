@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CoachPro — Marianne</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surf:#13131a;--surf2:#1c1c26;--surf3:#252535;--border:rgba(255,255,255,0.08);--accent:#6C63FF;--accent2:#FF6B9D;--accent3:#00D4AA;--text:#f0f0f8;--text2:#9090b0;--text3:#5a5a78;--r:20px;--r2:12px;--safe:env(safe-area-inset-bottom,16px);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-100px;left:50%;transform:translateX(-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(108,99,255,0.2) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.view{display:none;flex-direction:column;min-height:100vh;padding-bottom:calc(84px + var(--safe));animation:fi .25s ease;}
+.view.on{display:flex;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hdr{position:sticky;top:0;z-index:10;padding:52px 20px 16px;background:linear-gradient(to bottom,var(--bg) 60%,transparent);}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;}
+h1{font-size:26px;font-weight:900;letter-spacing:-0.5px;}
+h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sub{font-size:13px;color:var(--text2);margin-top:2px;}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),#FF8C42);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;flex-shrink:0;}
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;align-items:center;justify-content:space-around;padding:10px 8px calc(var(--safe) + 8px);background:rgba(19,19,26,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;border-radius:14px;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;transition:color .2s;}
+.nb svg{width:22px;height:22px;}
+.nb.on{color:var(--accent);}
+.nb.on svg{transform:translateY(-1px);}
+.nd{width:4px;height:4px;border-radius:50%;background:transparent;transition:background .2s;}
+.nb.on .nd{background:var(--accent);}
+/* CAL */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin:0 16px 12px;}
+.cal-m{font-size:20px;font-weight:800;}
+.cal-nb{background:var(--surf2);border:none;color:var(--text);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px;}
+.cal-dl{text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:6px 0;text-transform:uppercase;}
+.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;position:relative;border:none;background:transparent;color:var(--text2);transition:all .15s;}
+.cd.oth{color:var(--text3);}
+.cd.tod{background:var(--surf2);color:var(--text);border:1.5px solid var(--accent);}
+.cd.sel{background:var(--accent);color:#fff;}
+.cd.has::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent2);}
+.cd.sel::after{background:rgba(255,255,255,0.8);}
+/* SECTION LABEL */
+.sec{padding:12px 16px 6px;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+/* SESSION CARD */
+.sl{padding:0 16px;display:flex;flex-direction:column;gap:10px;}
+.sc{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,var(--accent));}
+.sc-date{font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.sc-act{display:flex;align-items:center;gap:6px;margin:4px 0;}
+.sc-act-lbl{font-size:15px;font-weight:800;}
+.sc-prev{font-size:12px;color:var(--text2);line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sc-foot{margin-top:10px;}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+/* STATS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:4px;}
+.stat{background:var(--surf);border:1px solid var(--border);border-radius:var(--r2);padding:14px;}
+.sv{font-size:28px;font-weight:900;}
+.sl2{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+/* DICO */
+.df{display:flex;gap:8px;overflow-x:auto;padding:0 16px;scrollbar-width:none;margin-bottom:14px;}
+.df::-webkit-scrollbar{display:none;}
+.dp{flex-shrink:0;padding:7px 14px;border-radius:30px;border:1.5px solid var(--border);background:var(--surf);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2);white-space:nowrap;font-family:'Nunito',sans-serif;}
+.dp.on{border-color:var(--accent3);background:rgba(0,212,170,0.12);color:var(--accent3);}
+.dl2{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+.di{background:var(--surf);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.di-l{flex:1;}
+.di-n{font-size:15px;font-weight:800;margin-bottom:3px;}
+.di-d{font-size:12px;color:var(--text2);line-height:1.4;}
+.di-t{font-size:11px;color:var(--accent3);font-weight:700;margin-top:5px;display:inline-block;background:rgba(0,212,170,0.1);padding:2px 8px;border-radius:10px;}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.mo.on{display:flex;}
+.mb{background:var(--surf);border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:20px 20px calc(var(--safe) + 24px);max-height:90vh;overflow-y:auto;animation:su .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.mt{font-size:20px;font-weight:900;margin-bottom:18px;}
+.lbl{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:block;}
+.inp{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;padding:12px 14px;outline:none;transition:border-color .2s;margin-bottom:14px;}
+.inp:focus{border-color:rgba(108,99,255,0.5);}
+.ta{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;line-height:1.6;padding:14px;resize:none;outline:none;min-height:140px;}
+.ta::placeholder,.inp::placeholder{color:var(--text3);}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.tag{padding:7px 13px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);cursor:pointer;color:var(--text2);background:transparent;font-family:'Nunito',sans-serif;transition:all .15s;}
+.tag.on{border-color:var(--accent);background:rgba(108,99,255,0.15);color:var(--accent);}
+.part-row{background:var(--surf2);border-radius:16px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.part-lbl{flex:1;font-size:15px;font-weight:700;}
+.part-ctrl{display:flex;align-items:center;gap:14px;}
+.part-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--surf3);color:var(--text);font-size:20px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;}
+.part-n{font-size:24px;font-weight:900;min-width:32px;text-align:center;color:var(--accent);}
+.btn-row{display:flex;gap:10px;margin-top:14px;}
+.btn-p{flex:1;padding:16px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,var(--accent),#8B5CF6);color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;}
+.btn-s{padding:14px 20px;border-radius:var(--r2);border:1.5px solid var(--border);background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-d{padding:8px 14px;border-radius:8px;border:none;background:rgba(255,59,48,0.15);color:#FF3B30;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+/* FAB */
+.fab{position:fixed;bottom:calc(84px + var(--safe));right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8B5CF6);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(108,99,255,0.4);z-index:50;}
+/* EMPTY */
+.empty{text-align:center;padding:40px 30px;}
+.empty .emo{font-size:44px;margin-bottom:12px;}
+.empty h3{font-size:17px;font-weight:800;margin-bottom:6px;}
+.empty p{font-size:13px;color:var(--text2);}
+/* TOAST */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surf3);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--accent3);color:var(--accent3);}
+.toast.err{border-color:#FF3B30;color:#FF3B30;}
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;}
+#loader .emo{font-size:52px;}
+#loader h2{font-size:18px;font-weight:800;}
+#loader p{font-size:13px;color:var(--text2);}
+#err-box{background:var(--surf);border:1px solid #FF3B30;border-radius:12px;padding:16px;font-size:12px;color:#FF3B30;word-break:break-all;width:100%;line-height:1.6;max-width:360px;margin:0 16px;}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="emo">🏊</div>
+  <h2>CoachPro</h2>
+  <p>Connexion en cours…</p>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- VIEW AGENDA -->
+<div class="view" id="v-cal">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div><h1>Coach<span>Pro</span></h1><div class="sub" id="today-lbl"></div></div>
+      <div class="avatar">MA</div>
+    </div>
+  </div>
+  <div class="cal-hdr">
+    <span class="cal-m" id="cal-m-lbl"></span>
+    <div style="display:flex;gap:8px">
+      <button class="cal-nb" onclick="chM(-1)">‹</button>
+      <button class="cal-nb" onclick="chM(1)">›</button>
+    </div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="sec">Sessions du <span id="sel-lbl"></span></div>
+  <div class="sl" id="sl-cal"></div>
+  <button class="fab" onclick="openNew()">+</button>
+</div>
+
+<!-- VIEW SESSIONS -->
+<div class="view" id="v-sess">
+  <div class="hdr">
+    <h1>Mes <span>Sessions</span></h1>
+  </div>
+  <div class="sg">
+    <div class="stat"><div class="sv" id="st-total">0</div><div class="sl2">Sessions totales</div></div>
+    <div class="stat"><div class="sv" id="st-part">—</div><div class="sl2">Participants moy.</div></div>
+  </div>
+  <div class="sec">Toutes les sessions</div>
+  <div class="sl" id="sl-all"></div>
+</div>
+
+<!-- VIEW DICO -->
+<div class="view" id="v-dico">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div><h1>Dico <span>Mémo</span></h1><div class="sub">Bibliothèque d'exercices</div></div>
+      <button class="btn-s" onclick="openDicoForm()" style="padding:10px 14px;font-size:12px;">+ Ajouter</button>
+    </div>
+  </div>
+  <div class="df" id="dico-filters"></div>
+  <div class="dl2" id="dico-list"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="main-nav" style="display:none">
+  <button class="nb on" onclick="sw('cal',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Agenda<div class="nd"></div>
+  </button>
+  <button class="nb" onclick="sw('sess',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Sessions<div class="nd"></div>
+  </button>
+  <button class="nb" onclick="sw('dico',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 10h8M8 14h5"/></svg>
+    Dico<div class="nd"></div>
+  </button>
+</nav>
+
+<!-- MODAL NOUVELLE SESSION -->
+<div class="mo" id="m-new">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mt" id="m-new-title">Nouvelle séance</div>
+    <span class="lbl">Activité</span>
+    <div class="tag-row" id="m-acts"></div>
+    <span class="lbl">Participants</span>
+    <div class="part-row">
+      <span class="part-lbl">Nombre de participants</span>
+      <div class="part-ctrl">
+        <button class="part-btn" onclick="chP(-1)">−</button>
+        <span class="part-n" id="part-n">8</span>
+        <button class="part-btn" onclick="chP(1)">+</button>
+      </div>
+    </div>
+    <span class="lbl">Contenu de la séance</span>
+    <textarea class="ta" id="m-txt" placeholder="Écris ton entraînement ici…"></textarea>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeM('m-new')">Annuler</button>
+      <button class="btn-p" onclick="saveSession()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="mo" id="m-detail">
+  <div class="mb">
+    <div class="mh"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="mt" style="margin:0" id="m-det-title"></div>
+      <button class="btn-d" onclick="delSession()">Supprimer</button>
+    </div>
+    <div id="m-det-body"></div>
+    <button class="btn-p" onclick="closeM('m-detail')" style="margin-top:14px">Fermer</button>
+  </div>
+</div>
+
+<!-- MODAL DICO FORM -->
+<div class="mo" id="m-dico">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mt">Nouvel exercice</div>
+    <span class="lbl">Nom</span>
+    <input class="inp" id="d-name" placeholder="Ex: Burpee, Gainage…">
+    <span class="lbl">Activité</span>
+    <div class="tag-row" id="d-acts"></div>
+    <span class="lbl">Description</span>
+    <textarea class="ta" id="d-desc" style="min-height:90px" placeholder="Reps, durée, consignes…"></textarea>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeM('m-dico')">Annuler</button>
+      <button class="btn-p" onclick="saveDico()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ══
+const SUPA = 'https://ttnzasxiqxcbewutzrya.supabase.co';
+const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0bnphc3hpcXhjYmV3dXR6cnlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDE4ODUsImV4cCI6MjA5MDUxNzg4NX0.MqDcgNoJL1dvGS9ADIVM1TtWQHtyBrFn8DhlgRR_gj4';
+const COACH = 'marianne';
+
+async function db(method, table, qs='', body=null){
+  const h={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
+  if(method==='POST') h['Prefer']='return=representation';
+  const r=await fetch(`${SUPA}/rest/v1/${table}${qs?'?'+qs:''}`,{method,headers:h,body:body?JSON.stringify(body):null});
+  const t=await r.text();
+  if(!r.ok) throw new Error(r.status+' '+t);
+  return t?JSON.parse(t):[];
+}
+
+// ══ DATA ══
+const ACTS=[
+  {id:'yoga',label:'Yoga',emoji:'🧘',color:'#FF6B9D'},
+  {id:'hiit',label:'HIIT',emoji:'🔥',color:'#FF4D4D'},
+  {id:'pilates',label:'Pilates',emoji:'🌀',color:'#6C63FF'},
+  {id:'stretching',label:'Stretching',emoji:'🤸',color:'#00D4AA'},
+  {id:'fitness',label:'Fitness',emoji:'💪',color:'#FFB800'},
+  {id:'cardio',label:'Cardio',emoji:'🏃',color:'#FF8C42'},
+  {id:'renfo',label:'Renfo',emoji:'🏋️',color:'#4ECDC4'},
+  {id:'natation',label:'Natation',emoji:'🏊',color:'#45B7D1'},
+];
+const MF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+const DF=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+let sessions=[], dico=[];
+let selDate=today(), calY=new Date().getFullYear(), calM=new Date().getMonth();
+let mPart=8, mAct=null, dAct=null, detId=null, dFilt='all';
+
+function today(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
+function p2(n){return String(n).padStart(2,'0');}
+function fmtS(s){const[y,m,d]=s.split('-');return `${d} ${MS[+m-1]} ${y}`;}
+function fmtF(s){const[y,m,d]=s.split('-');const dt=new Date(+y,+m-1,+d);return `${DF[dt.getDay()]} ${d} ${MF[+m-1]}`;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function actBy(id){return ACTS.find(a=>a.id===id)||{label:id,emoji:'🏅',color:'#6C63FF'};}
+
+// ══ TOAST ══
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} on`;
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+
+// ══ VIEWS ══
+function sw(name, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('v-'+name).classList.add('on');
+  if(btn) btn.classList.add('on');
+  document.querySelector('.fab').style.display = name==='cal'?'flex':'none';
+  if(name==='sess') renderAll();
+  if(name==='dico') renderDico();
+  if(name==='cal') renderCalList();
+}
+
+// ══ CALENDAR ══
+function chM(d){
+  calM+=d;
+  if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;}
+  renderCal();
+}
+function renderCal(){
+  document.getElementById('cal-m-lbl').textContent=`${MF[calM]} ${calY}`;
+  const days=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  let h=days.map(d=>`<div class="cal-dl">${d}</div>`).join('');
+  let st=new Date(calY,calM,1).getDay(); st=st===0?6:st-1;
+  const dim=new Date(calY,calM+1,0).getDate();
+  const prev=new Date(calY,calM,0).getDate();
+  const td=today();
+  for(let i=0;i<st;i++) h+=`<button class="cd oth">${prev-st+1+i}</button>`;
+  for(let d=1;d<=dim;d++){
+    const s=`${calY}-${p2(calM+1)}-${p2(d)}`;
+    const has=sessions.some(x=>x.date===s);
+    h+=`<button class="cd${s===td?' tod':''}${s===selDate?' sel':''}${has?' has':''}" onclick="selD('${s}')">${d}</button>`;
+  }
+  const rem=(7-(st+dim)%7)%7;
+  for(let d=1;d<=rem;d++) h+=`<button class="cd oth">${d}</button>`;
+  document.getElementById('cal-grid').innerHTML=h;
+}
+function selD(s){
+  selDate=s;
+  renderCal();
+  document.getElementById('sel-lbl').textContent=fmtF(s);
+  renderCalList();
+}
+function renderCalList(){
+  const c=document.getElementById('sl-cal');
+  const list=sessions.filter(s=>s.date===selDate);
+  c.innerHTML=list.length?list.map(sCard).join(''):`<div class="empty"><div class="emo">📝</div><h3>Aucune session</h3><p>Appuie sur + pour créer une séance.</p></div>`;
+}
+
+// ══ SESSION CARD ══
+function sCard(s){
+  const a=actBy(s.activity);
+  return `<div class="sc" style="--c:${a.color}" onclick="openDetail('${s.id}')">
+    <div class="sc-date">${fmtS(s.date)}</div>
+    <div class="sc-act"><span style="font-size:18px">${a.emoji}</span><span class="sc-act-lbl">${a.label}</span></div>
+    ${s.text?`<div class="sc-prev">${s.text}</div>`:''}
+    <div class="sc-foot"><span class="badge" style="background:${a.color}22;color:${a.color}">👥 ${s.participants} participant${s.participants>1?'s':''}</span></div>
+  </div>`;
+}
+function renderAll(){
+  const c=document.getElementById('sl-all');
+  const list=[...sessions].sort((a,b)=>b.date.localeCompare(a.date));
+  c.innerHTML=list.length?list.map(sCard).join(''):`<div class="empty"><div class="emo">🏅</div><h3>Pas encore de session</h3><p>Va sur Agenda pour commencer !</p></div>`;
+  document.getElementById('st-total').textContent=sessions.length;
+  document.getElementById('st-part').textContent=sessions.length?Math.round(sessions.reduce((a,s)=>a+s.participants,0)/sessions.length):'—';
+}
+
+// ══ NEW SESSION ══
+function openNew(){
+  mAct=null; mPart=8;
+  document.getElementById('part-n').textContent=8;
+  document.getElementById('m-txt').value='';
+  document.getElementById('m-new-title').textContent=`Séance du ${fmtS(selDate)}`;
+  renderActTags('m-acts',mAct,id=>{mAct=id;renderActTags('m-acts',mAct,arguments.callee);});
+  openM('m-new');
+}
+function chP(d){mPart=Math.max(1,mPart+d);document.getElementById('part-n').textContent=mPart;}
+
+async function saveSession(){
+  if(!mAct){toast('Choisis une activité !','err');return;}
+  const btn=document.querySelector('#m-new .btn-p');
+  btn.disabled=true; btn.textContent='⏳ Enregistrement…';
+  try{
+    const row={id:uid(),coach_id:COACH,date:selDate,activity:mAct,participants:mPart,text:document.getElementById('m-txt').value.trim()};
+    await db('POST','sessions','',row);
+    sessions.unshift(row);
+    closeM('m-new'); renderCal(); renderCalList();
+    toast('✅ Session enregistrée !');
+  }catch(e){ toast('Erreur : '+e.message,'err'); }
+  finally{ btn.disabled=false; btn.textContent='Enregistrer'; }
+}
+
+function openDetail(id){
+  detId=id;
+  const s=sessions.find(x=>x.id===id); if(!s)return;
+  const a=actBy(s.activity);
+  document.getElementById('m-det-title').textContent=`${a.emoji} ${a.label}`;
+  document.getElementById('m-det-body').innerHTML=`
+    <div style="font-size:13px;color:var(--text2);font-weight:700;margin-bottom:12px">${fmtF(s.date)}</div>
+    <div style="margin-bottom:14px"><span class="badge" style="background:${a.color}22;color:${a.color}">👥 ${s.participants} participant${s.participants>1?'s':''}</span></div>
+    ${s.text?`<div style="background:var(--surf2);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;white-space:pre-wrap">${s.text}</div>`:'<div style="color:var(--text3);font-style:italic;font-size:14px">Aucun contenu rédigé.</div>'}`;
+  openM('m-detail');
+}
+async function delSession(){
+  if(!confirm('Supprimer cette session ?'))return;
+  try{
+    await db('DELETE','sessions',`id=eq.${detId}`);
+    sessions=sessions.filter(s=>s.id!==detId);
+    closeM('m-detail'); renderCal(); renderCalList(); renderAll();
+    toast('Session supprimée');
+  }catch(e){toast('Erreur','err');}
+}
+
+// ══ ACT TAGS ══
+function renderActTags(containerId, selected, onSelect){
+  document.getElementById(containerId).innerHTML=ACTS.map(a=>`
+    <button class="tag${selected===a.id?' on':''}" onclick="(${onSelect.toString()})('${a.id}')">${a.emoji} ${a.label}</button>`).join('');
+}
+
+// ══ DICO ══
+function renderDico(){
+  const f=document.getElementById('dico-filters');
+  f.innerHTML=`<button class="dp${dFilt==='all'?' on':''}" onclick="setDF('all')">Tous</button>`+
+    ACTS.map(a=>`<button class="dp${dFilt===a.id?' on':''}" onclick="setDF('${a.id}')">${a.emoji} ${a.label}</button>`).join('');
+  const list=dFilt==='all'?dico:dico.filter(d=>d.activity===dFilt);
+  const c=document.getElementById('dico-list');
+  c.innerHTML=list.map(item=>{
+    const a=actBy(item.activity);
+    return `<div class="di"><div class="di-l"><div class="di-n">${a.emoji} ${item.name}</div>${item.description?`<div class="di-d">${item.description}</div>`:''}<span class="di-t">${a.label}</span></div><button class="btn-d" onclick="delDico('${item.id}')">✕</button></div>`;
+  }).join('')||`<div class="empty"><div class="emo">📚</div><h3>Bibliothèque vide</h3><p>Ajoute tes exercices favoris.</p></div>`;
+}
+function setDF(id){dFilt=id;renderDico();}
+function openDicoForm(){
+  dAct=null;
+  document.getElementById('d-name').value='';
+  document.getElementById('d-desc').value='';
+  renderActTags('d-acts',dAct,id=>{dAct=id;renderActTags('d-acts',dAct,arguments.callee);});
+  openM('m-dico');
+}
+async function saveDico(){
+  const name=document.getElementById('d-name').value.trim();
+  if(!name){toast('Donne un nom !','err');return;}
+  if(!dAct){toast('Choisis une activité !','err');return;}
+  try{
+    const row={id:uid(),coach_id:COACH,name,activity:dAct,description:document.getElementById('d-desc').value.trim()};
+    await db('POST','dico','',row);
+    dico.push(row); closeM('m-dico'); renderDico();
+    toast('✅ Exercice ajouté !');
+  }catch(e){toast('Erreur : '+e.message,'err');}
+}
+async function delDico(id){
+  if(!confirm('Supprimer ?'))return;
+  try{
+    await db('DELETE','dico',`id=eq.${id}`);
+    dico=dico.filter(d=>d.id!==id); renderDico();
+    toast('Supprimé');
+  }catch(e){toast('Erreur','err');}
+}
+
+// ══ MODALS ══
+function openM(id){document.getElementById(id).classList.add('on');}
+function closeM(id){document.getElementById(id).classList.remove('on');}
+document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('on');}));
+
+// ══ INIT ══
+(async()=>{
+  const loader=document.getElementById('loader');
+  try{
+    const[s,d]=await Promise.all([
+      db('GET','sessions',`coach_id=eq.${COACH}&order=date.desc`),
+      db('GET','dico',`coach_id=eq.${COACH}&order=name.asc`)
+    ]);
+    sessions=s; dico=d;
+    loader.style.display='none';
+    document.getElementById('main-nav').style.display='flex';
+    document.getElementById('v-cal').classList.add('on');
+    document.getElementById('today-lbl').textContent=fmtF(today());
+    document.getElementById('sel-lbl').textContent=fmtF(selDate);
+    renderCal(); renderCalList();
+  }catch(e){
+    loader.innerHTML=`
+      <div class="emo">⚠️</div>
+      <h2>Erreur de connexion</h2>
+      <div id="err-box">${e.message}</div>
+      <button class="btn-p" onclick="location.reload()" style="margin-top:8px;max-width:200px">Réessayer</button>`;
+  }
+})();
+</script>
+</body>
+</html>
