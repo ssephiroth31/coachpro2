@@ -136,6 +136,23 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
 .time-slot{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .time-slot-lbl{font-size:12px;font-weight:700;color:var(--accent);width:100%;margin-bottom:4px;}
 .time-slot-sep{font-size:13px;color:var(--text3);font-weight:700;}
+/* Bouton créneau (ouvre la roulette) */
+.slot-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--surf3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;cursor:pointer;min-height:44px;}
+.slot-btn .arr{color:var(--text3);font-size:15px;}
+.slot-btn .dur{font-size:11px;font-weight:700;color:var(--accent);background:rgba(108,99,255,0.12);padding:2px 8px;border-radius:10px;}
+/* Roulette horaire style iOS */
+.wheel-wrap{position:relative;display:flex;gap:4px;align-items:stretch;margin:6px 0 14px;}
+.wheel-band{position:absolute;left:0;right:0;top:80px;height:40px;background:var(--surf3);border-radius:10px;pointer-events:none;z-index:0;}
+.wheel-col{position:relative;z-index:1;flex:1;height:200px;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%,#000 70%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%,#000 70%,transparent 100%);}
+.wheel-col::-webkit-scrollbar{display:none;}
+.wheel-pad{height:80px;}
+.wheel-item{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:20px;font-weight:700;color:var(--text3);cursor:pointer;}
+.wheel-item.on{color:var(--text);font-weight:900;font-size:22px;}
+.wheel-sep{position:relative;z-index:1;width:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--text3);}
+.wheel-gap{width:18px;}
+.wheel-heads{display:flex;gap:4px;}
+.wheel-heads div{flex:1;text-align:center;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text3);}
 .btn-add-slot{padding:8px 14px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;color:var(--text3);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px;width:100%;text-align:center;}
 
 /* ── MATERIEL INLINE ── */
@@ -169,17 +186,20 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
 .editor-body [style*="background-color"]{border-radius:3px;padding:0 2px;}
 
 /* MODALE EN MODE FLEX (toolbar et boutons toujours visibles) */
-.mb-flex{
+.mb.mb-flex{
   display:flex;
   flex-direction:column;
   padding:20px 20px calc(var(--safe) + 16px);
+  overflow:hidden; /* annule l'overflow du .mb pour que le flex gère la hauteur */
+  max-height:92vh;
+  height:92vh;
 }
 .mb-scroll{
   flex:1 1 auto;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   margin:0 -20px;
-  padding:0 20px;
+  padding:0 20px 8px;
   min-height:0;
 }
 /* TOOLBAR ANCRÉE EN BAS DE LA MODALE - jamais bloquée */
@@ -194,6 +214,8 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
   flex-wrap:wrap;
   gap:2px;
   box-shadow:0 -2px 12px rgba(0,0,0,0.15);
+  position:relative;
+  z-index:2;
 }
 .tb-btn{width:34px;height:34px;border-radius:8px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-family:'Nunito',sans-serif;font-weight:700;flex-shrink:0;}
 .tb-color-wheel{
@@ -248,6 +270,20 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
 
 /* ── LOADER ── */
 #loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;}
+
+/* ── TABLETTE / iPad (≥ 768px) ── */
+@media (min-width: 768px){
+  body{max-width:600px;}
+  .nav{max-width:600px;}
+  .mb{max-width:600px;}
+  /* Fond ambiance plus large */
+  [data-theme="dark"] body::before{width:420px;height:420px;top:-140px;}
+  [data-theme="dark"] .hdr-hero::before{width:220px;height:220px;}
+  /* Petits ajustements visuels pour le confort tablette */
+  h1{font-size:30px;}
+  .hdr-brand-name{font-size:22px;}
+  .editor-body{font-size:19px;}
+}
 </style>
 </head>
 <body>
@@ -476,6 +512,34 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
     <div class="btn-row">
       <button class="btn-s" onclick="closeM('m-dup')">Annuler</button>
       <button class="btn-p" onclick="confirmDup()">Dupliquer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ROULETTE HORAIRE ══ -->
+<div class="mo" id="m-wheel">
+  <div class="mb">
+    <div class="mh"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="mt" style="margin:0" id="wheel-title">Créneau</div>
+      <span class="slot-btn" style="flex:0;padding:6px 12px;font-size:15px;cursor:default;white-space:nowrap;" id="wheel-preview"></span>
+    </div>
+    <div class="wheel-heads">
+      <div style="flex:2.3">Début</div><div class="wheel-gap" style="flex:0"></div><div style="flex:2.3">Fin</div>
+    </div>
+    <div class="wheel-wrap">
+      <div class="wheel-band"></div>
+      <div class="wheel-col" id="wh-hD"></div>
+      <div class="wheel-sep">h</div>
+      <div class="wheel-col" id="wh-mD"></div>
+      <div class="wheel-gap"></div>
+      <div class="wheel-col" id="wh-hF"></div>
+      <div class="wheel-sep">h</div>
+      <div class="wheel-col" id="wh-mF"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeM('m-wheel')">Annuler</button>
+      <button class="btn-p" onclick="confirmWheel()">Valider</button>
     </div>
   </div>
 </div>
@@ -729,13 +793,12 @@ function setupAutoList(editorId){
 }
 
 // ══ TIME SLOTS (début + fin) ══
-function buildHOpts(sel){
-  let o='';
-  for(let h=5;h<=23;h++) o+=`<option value="${p2(h)}"${p2(h)===sel?' selected':''}>${p2(h)}h</option>`;
-  return o;
-}
-function buildMOpts(sel){
-  return ['00','15','30','45'].map(m=>`<option value="${m}"${m===sel?' selected':''}>${m}</option>`).join('');
+// Durée lisible entre début et fin
+function slotDur(s){
+  const d=(+s.hF*60+ +s.mF)-(+s.hD*60+ +s.mD);
+  if(d<=0) return '';
+  const h=Math.floor(d/60),m=d%60;
+  return h?(m?`${h}h${p2(m)}`:`${h}h`):`${m} min`;
 }
 function renderSlots(){
   const c=document.getElementById('slots-list');
@@ -743,13 +806,88 @@ function renderSlots(){
   c.innerHTML=timeSlots.map((s,i)=>`
     <div class="time-slot">
       <div class="time-slot-lbl">🕐 Créneau ${i+1}</div>
-      <select class="time-sel" style="max-width:78px;font-size:14px;padding:8px;" onchange="updateSlot(${i},'hD',this.value)">${buildHOpts(s.hD)}</select>
-      <select class="time-sel" style="max-width:70px;font-size:14px;padding:8px;" onchange="updateSlot(${i},'mD',this.value)">${buildMOpts(s.mD)}</select>
-      <span class="time-slot-sep">→</span>
-      <select class="time-sel" style="max-width:78px;font-size:14px;padding:8px;" onchange="updateSlot(${i},'hF',this.value)">${buildHOpts(s.hF)}</select>
-      <select class="time-sel" style="max-width:70px;font-size:14px;padding:8px;" onchange="updateSlot(${i},'mF',this.value)">${buildMOpts(s.mF)}</select>
-      ${timeSlots.length>1?`<button class="btn-d" style="padding:6px 10px;font-size:11px;margin-left:auto;" onclick="removeSlot(${i})">✕</button>`:''}
+      <button class="slot-btn" onclick="openWheel(${i})">
+        <span>${s.hD}h${s.mD}</span><span class="arr">→</span><span>${s.hF}h${s.mF}</span>
+        ${slotDur(s)?`<span class="dur">${slotDur(s)}</span>`:''}
+      </button>
+      ${timeSlots.length>1?`<button class="btn-d" style="padding:6px 10px;font-size:11px;min-height:44px;" onclick="removeSlot(${i})">✕</button>`:''}
     </div>`).join('');
+}
+
+// ══ ROULETTE HORAIRE ══
+const WH_H=[];for(let h=5;h<=23;h++) WH_H.push(p2(h));
+const WH_M=[];for(let m=0;m<60;m+=5) WH_M.push(p2(m));
+const WH_ITEM=40;
+let wheelIdx=null,wheelVals=null;
+const _wheelTimers={};
+
+function buildWheelCol(id,list,key){
+  const col=document.getElementById(id);
+  col.innerHTML='<div class="wheel-pad"></div>'+
+    list.map((v,i)=>`<div class="wheel-item" data-i="${i}">${v}</div>`).join('')+
+    '<div class="wheel-pad"></div>';
+  col.onscroll=()=>{
+    clearTimeout(_wheelTimers[id]);
+    _wheelTimers[id]=setTimeout(()=>{
+      const i=Math.max(0,Math.min(list.length-1,Math.round(col.scrollTop/WH_ITEM)));
+      wheelVals[key]=list[i];
+      markWheel(col,i);
+      updateWheelPreview();
+    },90);
+  };
+  col.onclick=e=>{
+    const it=e.target.closest('.wheel-item');
+    if(it) col.scrollTo({top:+it.dataset.i*WH_ITEM,behavior:'smooth'});
+  };
+}
+function markWheel(col,i){
+  col.querySelectorAll('.wheel-item').forEach(el=>el.classList.toggle('on',+el.dataset.i===i));
+}
+function setWheel(id,list,val){
+  const col=document.getElementById(id);
+  let i=list.indexOf(val);
+  if(i<0){ // valeur hors liste (ex: minute 07) → la plus proche
+    i=list.reduce((b,v,k)=>Math.abs(+v-+val)<Math.abs(+list[b]-+val)?k:b,0);
+  }
+  col.scrollTop=i*WH_ITEM;
+  markWheel(col,i);
+}
+function updateWheelPreview(){
+  const s=wheelVals;
+  const dur=slotDur(s);
+  document.getElementById('wheel-preview').textContent=
+    `${s.hD}h${s.mD} → ${s.hF}h${s.mF}`+(dur?` · ${dur}`:'');
+}
+function openWheel(i){
+  wheelIdx=i;
+  wheelVals={...timeSlots[i]};
+  document.getElementById('wheel-title').textContent=`Créneau ${i+1}`;
+  buildWheelCol('wh-hD',WH_H,'hD');
+  buildWheelCol('wh-mD',WH_M,'mD');
+  buildWheelCol('wh-hF',WH_H,'hF');
+  buildWheelCol('wh-mF',WH_M,'mF');
+  openM('m-wheel');
+  // Positionner après affichage (sinon scrollTop ignoré)
+  requestAnimationFrame(()=>{
+    setWheel('wh-hD',WH_H,wheelVals.hD);
+    setWheel('wh-mD',WH_M,wheelVals.mD);
+    setWheel('wh-hF',WH_H,wheelVals.hF);
+    setWheel('wh-mF',WH_M,wheelVals.mF);
+    updateWheelPreview();
+  });
+}
+function confirmWheel(){
+  const s=wheelVals;
+  const start=+s.hD*60+ +s.mD, end=+s.hF*60+ +s.mF;
+  if(end<=start){
+    // Fin avant début → fin = début + 1h (max 23h55)
+    const e=Math.min(start+60,23*60+55);
+    s.hF=p2(Math.floor(e/60));s.mF=p2(e%60);
+    toast('Fin ajustée à '+s.hF+'h'+s.mF,'err');
+  }
+  timeSlots[wheelIdx]={...s};
+  closeM('m-wheel');
+  renderSlots();
 }
 function addSlot(){
   const now=new Date();
