@@ -185,10 +185,10 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
 /* Numéros et puces en gras (Safari iOS ignore font-weight sur ::marker → compteur dessiné à la main) */
 .editor-body ol,.rich-content ol{list-style:none;counter-reset:num;padding-left:30px;}
 .editor-body ol>li,.rich-content ol>li{counter-increment:num;position:relative;}
-.editor-body ol>li::before,.rich-content ol>li::before{content:counter(num) ".";position:absolute;right:calc(100% + 6px);font-weight:900;white-space:nowrap;}
+.editor-body ol>li::before,.rich-content ol>li::before{content:counter(num) ".";position:absolute;right:calc(100% + 6px);font-weight:900;color:var(--accent);white-space:nowrap;}
 .editor-body ul,.rich-content ul{list-style:none;padding-left:24px;}
 .editor-body ul>li,.rich-content ul>li{position:relative;}
-.editor-body ul>li::before,.rich-content ul>li::before{content:"•";position:absolute;right:calc(100% + 8px);font-weight:900;white-space:nowrap;}
+.editor-body ul>li::before,.rich-content ul>li::before{content:"•";position:absolute;right:calc(100% + 8px);font-weight:900;color:var(--accent);white-space:nowrap;}
 /* Surlignage semi-transparent */
 .editor-body [style*="background-color"]{border-radius:3px;padding:0 2px;}
 
