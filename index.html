@@ -198,9 +198,15 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
   flex-direction:column;
   padding:20px 20px calc(var(--safe) + 16px);
   overflow:hidden; /* annule l'overflow du .mb pour que le flex gère la hauteur */
-  max-height:92vh;
-  height:92vh;
+  max-height:92%;
+  height:92%;
 }
+/* Clavier iPhone ouvert : la fenêtre occupe toute la zone visible, la barre d'outils colle au clavier */
+body.kb-open .mb.mb-flex{height:100%;max-height:100%;border-radius:0;padding:10px 16px 6px;}
+body.kb-open .mb.mb-flex .mh{display:none;}
+body.kb-open .mb.mb-flex .btn-row{order:2;margin-top:8px;}
+body.kb-open .mb.mb-flex .sticky-toolbar{order:3;margin-top:8px;}
+body.kb-open .mb.mb-flex .btn-row .btn-p,body.kb-open .mb.mb-flex .btn-row .btn-s{padding:10px 14px;}
 .mb-scroll{
   flex:1 1 auto;
   overflow-y:auto;
@@ -1490,6 +1496,39 @@ async function delDico(id){
 // ══ MODALS ══
 function openM(id){document.getElementById(id).classList.add('on');}
 function closeM(id){document.getElementById(id).classList.remove('on');}
+
+// ══ CLAVIER iOS : ajuster les fenêtres à la zone visible ══
+// Sur iPhone le clavier ne réduit pas la page : sans ça la barre d'outils reste cachée derrière.
+let _vvMax=0;
+function fitModalsToViewport(){
+  const vv=window.visualViewport;if(!vv)return;
+  _vvMax=Math.max(_vvMax,vv.height);
+  const kb=vv.height<_vvMax*0.75;
+  document.body.classList.toggle('kb-open',kb);
+  document.querySelectorAll('.mo').forEach(mo=>{
+    if(kb){mo.style.top=vv.offsetTop+'px';mo.style.height=vv.height+'px';mo.style.bottom='auto';}
+    else{mo.style.top='';mo.style.height='';mo.style.bottom='';}
+  });
+  if(kb) setTimeout(keepCaretVisible,60);
+}
+// Faire défiler la zone de la séance pour garder le curseur visible au-dessus de la barre d'outils
+function keepCaretVisible(){
+  const ed=document.getElementById('editor');
+  if(document.activeElement!==ed)return;
+  const box=ed.closest('.mb-scroll');if(!box)return;
+  const sel=window.getSelection();if(!sel.rangeCount)return;
+  let r=sel.getRangeAt(0).getBoundingClientRect();
+  if(!r.height){const n=sel.anchorNode&&(sel.anchorNode.nodeType===1?sel.anchorNode:sel.anchorNode.parentElement);if(n)r=n.getBoundingClientRect();}
+  const b=box.getBoundingClientRect();
+  if(r.bottom>b.bottom-12) box.scrollTop+=r.bottom-b.bottom+40;
+  else if(r.top<b.top+12) box.scrollTop-=b.top-r.top+40;
+}
+(function(){const ed=document.getElementById('editor');if(ed){ed.addEventListener('input',()=>{if(document.body.classList.contains('kb-open'))keepCaretVisible();});ed.addEventListener('click',()=>setTimeout(keepCaretVisible,300));}})();
+if(window.visualViewport){
+  visualViewport.addEventListener('resize',fitModalsToViewport);
+  visualViewport.addEventListener('scroll',fitModalsToViewport);
+  fitModalsToViewport();
+}
 document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',ev=>{if(ev.target===el){el.classList.remove('on');hideToolbar();}}));
 
 // ══ VISIBILITE — anti-crash verrouillage ══
