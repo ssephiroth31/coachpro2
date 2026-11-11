@@ -204,8 +204,6 @@ h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-
 /* Clavier iPhone ouvert : la fenêtre occupe toute la zone visible, la barre d'outils colle au clavier */
 body.kb-open .mb.mb-flex{height:100%;max-height:100%;border-radius:0;padding:10px 16px 6px;}
 body.kb-open .mb.mb-flex .mh{display:none;}
-body.kb-open .mb.mb-flex .btn-row{order:2;margin-top:8px;}
-body.kb-open .mb.mb-flex .sticky-toolbar{order:3;margin-top:8px;}
 body.kb-open .mb.mb-flex .btn-row .btn-p,body.kb-open .mb.mb-flex .btn-row .btn-s{padding:10px 14px;}
 .mb-scroll{
   flex:1 1 auto;
@@ -215,21 +213,11 @@ body.kb-open .mb.mb-flex .btn-row .btn-p,body.kb-open .mb.mb-flex .btn-row .btn-
   padding:0 20px 8px;
   min-height:0;
 }
-/* TOOLBAR ANCRÉE EN BAS DE LA MODALE - jamais bloquée */
-.sticky-toolbar{
-  flex-shrink:0;
-  background:var(--surf3);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:6px 6px;
-  margin-top:10px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:2px;
-  box-shadow:0 -2px 12px rgba(0,0,0,0.15);
-  position:relative;
-  z-index:2;
-}
+/* Cadre éditeur : barre d'outils fixe en haut, texte qui défile dessous (comme SwimCoach) */
+.editor-frame{border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;background:var(--surf2);}
+.editor-frame:focus-within{border-color:rgba(108,99,255,0.6);}
+.sticky-toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:6px;background:var(--surf3);border-bottom:1px solid var(--border);}
+.editor-frame .editor-body{border:none;border-radius:0;max-height:340px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .tb-btn{width:34px;height:34px;border-radius:8px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-family:'Nunito',sans-serif;font-weight:700;flex-shrink:0;}
 .tb-color-wheel{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -422,40 +410,41 @@ body.kb-open .mb.mb-flex .btn-row .btn-p,body.kb-open .mb.mb-flex .btn-row .btn-
       </div>
 
       <span class="lbl">Contenu de la séance</span>
-      <div class="editor-body" id="editor" contenteditable="true" data-placeholder="Écris ton entraînement ici…"></div>
-    </div>
-
-    <!-- TOOLBAR ANCRÉE EN BAS DE LA MODALE - TOUJOURS VISIBLE -->
-    <div class="sticky-toolbar" id="sticky-toolbar">
-      <button class="tb-btn" title="Gras" onmousedown="fmt(event,'bold')"><b>B</b></button>
-      <button class="tb-btn" title="Italique" onmousedown="fmt(event,'italic')"><i style="font-style:italic">I</i></button>
-      <button class="tb-btn" title="Souligné" onmousedown="fmt(event,'underline')"><u>S</u></button>
-      <button class="tb-btn" title="Titre" onmousedown="fmtTitle(event)" style="font-size:13px;font-weight:900">T</button>
-      <button class="tb-btn" title="Puces" onmousedown="fmt(event,'insertUnorderedList')">☰</button>
-      <button class="tb-btn" title="Numérotée" onmousedown="fmt(event,'insertOrderedList')" style="font-size:12px;font-weight:900">1.</button>
-      <div class="tb-sep"></div>
-      <label class="tb-color-wheel" title="Couleur texte">
-        <span style="font-size:10px;font-weight:800;color:var(--text2);">A</span>
-        <span id="color-dot" style="display:block;width:14px;height:4px;border-radius:2px;background:#f0f0f8;margin-top:1px;"></span>
-        <input type="color" id="color-picker" value="#f0f0f8" oninput="applyColor(this.value)">
-      </label>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#1a1a1a;border:1.5px solid rgba(255,255,255,0.2);margin:7px 1px;" onmousedown="fmtColor(event,'#1a1a1a')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FF4D4D;margin:7px 1px;" onmousedown="fmtColor(event,'#FF4D4D')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FFD700;margin:7px 1px;" onmousedown="fmtColor(event,'#FFD700')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#00D4AA;margin:7px 1px;" onmousedown="fmtColor(event,'#00D4AA')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#6C63FF;margin:7px 1px;" onmousedown="fmtColor(event,'#6C63FF')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FF6B9D;margin:7px 1px;" onmousedown="fmtColor(event,'#FF6B9D')"></button>
-      <div class="tb-sep"></div>
-      <label class="tb-color-wheel" title="Couleur surlignage">
-        <span style="font-size:10px;font-weight:800;color:var(--text2);">HL</span>
-        <span id="hl-dot" style="display:block;width:14px;height:4px;border-radius:2px;background:rgba(255,215,0,0.5);margin-top:1px;"></span>
-        <input type="color" id="hl-picker" value="#FFD700" oninput="applyHLPicker(this.value)">
-      </label>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(255,215,0,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#FFD700')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(144,238,144,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#90EE90')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(135,206,235,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#87CEEB')"></button>
-      <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(255,182,193,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#FFB6C1')"></button>
-      <button class="tb-btn" title="Enlever" onmousedown="fmtHL(event,'transparent')" style="font-size:10px;font-weight:900;color:var(--text3);">✕HL</button>
+      <!-- Barre d'outils verrouillée au-dessus du texte (le texte défile dans son cadre) -->
+      <div class="editor-frame">
+      <div class="sticky-toolbar" id="sticky-toolbar">
+        <button class="tb-btn" title="Gras" onmousedown="fmt(event,'bold')"><b>B</b></button>
+        <button class="tb-btn" title="Italique" onmousedown="fmt(event,'italic')"><i style="font-style:italic">I</i></button>
+        <button class="tb-btn" title="Souligné" onmousedown="fmt(event,'underline')"><u>S</u></button>
+        <button class="tb-btn" title="Titre" onmousedown="fmtTitle(event)" style="font-size:13px;font-weight:900">T</button>
+        <button class="tb-btn" title="Puces" onmousedown="fmt(event,'insertUnorderedList')">☰</button>
+        <button class="tb-btn" title="Numérotée" onmousedown="fmt(event,'insertOrderedList')" style="font-size:12px;font-weight:900">1.</button>
+        <div class="tb-sep"></div>
+        <label class="tb-color-wheel" title="Couleur texte">
+          <span style="font-size:10px;font-weight:800;color:var(--text2);">A</span>
+          <span id="color-dot" style="display:block;width:14px;height:4px;border-radius:2px;background:#f0f0f8;margin-top:1px;"></span>
+          <input type="color" id="color-picker" value="#f0f0f8" oninput="applyColor(this.value)">
+        </label>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#1a1a1a;border:1.5px solid rgba(255,255,255,0.2);margin:7px 1px;" onmousedown="fmtColor(event,'#1a1a1a')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FF4D4D;margin:7px 1px;" onmousedown="fmtColor(event,'#FF4D4D')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FFD700;margin:7px 1px;" onmousedown="fmtColor(event,'#FFD700')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#00D4AA;margin:7px 1px;" onmousedown="fmtColor(event,'#00D4AA')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#6C63FF;margin:7px 1px;" onmousedown="fmtColor(event,'#6C63FF')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:50%;background:#FF6B9D;margin:7px 1px;" onmousedown="fmtColor(event,'#FF6B9D')"></button>
+        <div class="tb-sep"></div>
+        <label class="tb-color-wheel" title="Couleur surlignage">
+          <span style="font-size:10px;font-weight:800;color:var(--text2);">HL</span>
+          <span id="hl-dot" style="display:block;width:14px;height:4px;border-radius:2px;background:rgba(255,215,0,0.5);margin-top:1px;"></span>
+          <input type="color" id="hl-picker" value="#FFD700" oninput="applyHLPicker(this.value)">
+        </label>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(255,215,0,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#FFD700')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(144,238,144,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#90EE90')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(135,206,235,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#87CEEB')"></button>
+        <button class="tb-btn" style="width:20px;height:20px;border-radius:3px;background:rgba(255,182,193,0.4);margin:7px 1px;" onmousedown="fmtHL(event,'#FFB6C1')"></button>
+        <button class="tb-btn" title="Enlever" onmousedown="fmtHL(event,'transparent')" style="font-size:10px;font-weight:900;color:var(--text3);">✕HL</button>
+      </div>
+        <div class="editor-body" id="editor" contenteditable="true" data-placeholder="Écris ton entraînement ici…"></div>
+      </div>
     </div>
 
     <!-- BOUTONS ANCRÉS EN BAS -->
@@ -1509,21 +1498,30 @@ function fitModalsToViewport(){
     if(kb){mo.style.top=vv.offsetTop+'px';mo.style.height=vv.height+'px';mo.style.bottom='auto';}
     else{mo.style.top='';mo.style.height='';mo.style.bottom='';}
   });
-  if(kb) setTimeout(keepCaretVisible,60);
+  setTimeout(keepCaretVisible,60);
 }
-// Faire défiler la zone de la séance pour garder le curseur visible au-dessus de la barre d'outils
+// Clavier ouvert : le cadre (barre + texte) se cale en haut de la zone visible et le texte prend la hauteur restante
 function keepCaretVisible(){
-  const ed=document.getElementById('editor');
+  const ed=document.getElementById('editor');if(!ed)return;
+  if(!document.body.classList.contains('kb-open')){ed.style.maxHeight='';return;}
   if(document.activeElement!==ed)return;
-  const box=ed.closest('.mb-scroll');if(!box)return;
-  const sel=window.getSelection();if(!sel.rangeCount)return;
-  let r=sel.getRangeAt(0).getBoundingClientRect();
-  if(!r.height){const n=sel.anchorNode&&(sel.anchorNode.nodeType===1?sel.anchorNode:sel.anchorNode.parentElement);if(n)r=n.getBoundingClientRect();}
-  const b=box.getBoundingClientRect();
-  if(r.bottom>b.bottom-12) box.scrollTop+=r.bottom-b.bottom+40;
-  else if(r.top<b.top+12) box.scrollTop-=b.top-r.top+40;
+  const box=ed.closest('.mb-scroll'),frame=ed.closest('.editor-frame'),tb=document.getElementById('sticky-toolbar');
+  if(!box||!frame||!tb)return;
+  ed.style.maxHeight=Math.max(120,box.clientHeight-tb.offsetHeight-12)+'px';
+  const d=frame.getBoundingClientRect().top-box.getBoundingClientRect().top;
+  if(Math.abs(d)>2) box.scrollTop+=d;
+  const sel=window.getSelection();
+  if(sel.rangeCount){
+    let r=sel.getRangeAt(0).getBoundingClientRect();
+    if(!r.height){const n=sel.anchorNode&&(sel.anchorNode.nodeType===1?sel.anchorNode:sel.anchorNode.parentElement);if(n&&ed.contains(n)&&n!==ed)r=n.getBoundingClientRect();}
+    if(r.height){
+      const e=ed.getBoundingClientRect();
+      if(r.bottom>e.bottom-8) ed.scrollTop+=r.bottom-e.bottom+24;
+      else if(r.top<e.top+8) ed.scrollTop-=e.top-r.top+24;
+    }
+  }
 }
-(function(){const ed=document.getElementById('editor');if(ed){ed.addEventListener('input',()=>{if(document.body.classList.contains('kb-open'))keepCaretVisible();});ed.addEventListener('click',()=>setTimeout(keepCaretVisible,300));}})();
+(function(){const ed=document.getElementById('editor');if(ed){ed.addEventListener('input',()=>{if(document.body.classList.contains('kb-open'))keepCaretVisible();});ed.addEventListener('click',()=>setTimeout(keepCaretVisible,300));ed.addEventListener('focus',()=>setTimeout(keepCaretVisible,300));}})();
 if(window.visualViewport){
   visualViewport.addEventListener('resize',fitModalsToViewport);
   visualViewport.addEventListener('scroll',fitModalsToViewport);
